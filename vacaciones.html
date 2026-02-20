@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Frondoso - Portal del Empleado</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --forest:#1a3a2a;--moss:#2d6a4f;--leaf:#52b788;--mint:#95d5b2;
+  --mist:#d8f3dc;--cream:#faf8f2;--ink:#1c1c1c;--stone:#6b7280;
+  --amber:#d97706;--amber-lt:#fef3c7;--error:#dc2626;--error-lt:#fef2f2;
+  --success:#059669;--success-lt:#ecfdf5;--green-pale:#f0faf3;--green-light:#d8f3dc;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh;color:var(--ink);overflow-x:hidden}
+
+/* ── LOGIN ─────────────────────── */
+#loginPage{position:fixed;inset:0;z-index:9999;display:flex;background:var(--forest)}
+#loginPage.out{animation:fadeOut .5s forwards}
+@keyframes fadeOut{to{opacity:0;pointer-events:none}}
+
+.l-left{flex:1;display:flex;flex-direction:column;justify-content:center;padding:60px 64px;position:relative;overflow:hidden}
+.l-left::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 20% 80%,rgba(82,183,136,.15) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 80% 20%,rgba(149,213,178,.08) 0%,transparent 60%)}
+.l-brand{display:flex;align-items:center;gap:14px;margin-bottom:52px;position:relative;z-index:1}
+.l-brand-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--leaf),var(--mint));display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 8px 24px rgba(82,183,136,.3)}
+.l-brand-name{font-family:'DM Serif Display',serif;font-size:28px;color:white}
+.l-brand-tag{font-size:11px;color:var(--mint);letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.l-headline{font-family:'DM Serif Display',serif;font-size:50px;line-height:1.05;color:white;margin-bottom:18px;position:relative;z-index:1}
+.l-headline em{font-style:italic;color:var(--mint)}
+.l-sub{font-size:15px;color:rgba(255,255,255,.5);line-height:1.7;max-width:340px;position:relative;z-index:1;margin-bottom:40px}
+.l-feats{display:flex;flex-direction:column;gap:12px;position:relative;z-index:1}
+.l-feat{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,.65);font-size:14px}
+.l-feat-dot{width:28px;height:28px;border-radius:8px;background:rgba(82,183,136,.12);border:1px solid rgba(82,183,136,.25);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+
+.l-right{width:420px;flex-shrink:0;background:var(--cream);display:flex;flex-direction:column;justify-content:center;padding:52px 44px;position:relative;box-shadow:-20px 0 60px rgba(0,0,0,.2)}
+.l-right::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--leaf),var(--mint))}
+.l-title{font-family:'DM Serif Display',serif;font-size:30px;color:var(--forest);margin-bottom:6px}
+.l-subtitle{font-size:14px;color:var(--stone);margin-bottom:32px;line-height:1.5}
+
+.l-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.l-field label{font-size:11px;font-weight:600;color:var(--moss);text-transform:uppercase;letter-spacing:.07em}
+.l-field input{font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:white;border:1.5px solid #e5e5e0;border-radius:10px;padding:12px 16px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.l-field input:focus{border-color:var(--leaf);box-shadow:0 0 0 3px rgba(82,183,136,.12)}
+.l-field input.err{border-color:var(--error)}
+
+.l-remember{display:flex;align-items:center;gap:8px;margin-bottom:22px;cursor:pointer}
+.l-remember input{width:16px;height:16px;accent-color:var(--moss);cursor:pointer}
+.l-remember span{font-size:13px;color:var(--stone)}
+
+.l-err{background:var(--error-lt);border:1px solid rgba(220,38,38,.2);border-radius:10px;padding:11px 14px;font-size:13px;color:var(--error);margin-bottom:16px;display:none;align-items:center;gap:8px}
+.l-err.show{display:flex}
+
+.btn-login{width:100%;background:linear-gradient(135deg,var(--moss),var(--forest));color:white;border:none;border-radius:12px;padding:14px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;box-shadow:0 4px 14px rgba(45,106,79,.3);letter-spacing:.02em}
+.btn-login:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(45,106,79,.4)}
+.btn-login:disabled{opacity:.7;cursor:not-allowed;transform:none}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.btn-login.loading .spinner{display:block}
+.btn-login.loading .btn-txt{opacity:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.l-hint{margin-top:20px;padding-top:20px;border-top:1px solid var(--mist);font-size:12px;color:var(--stone);text-align:center;line-height:1.6}
+.l-hint strong{color:var(--moss)}
+
+/* ── APP ───────────────────────── */
+#app{display:none;flex-direction:column;min-height:100vh}
+#app.show{display:flex}
+
+header{background:var(--forest);padding:0 40px;display:flex;align-items:center;justify-content:space-between;height:68px;box-shadow:0 2px 20px rgba(26,58,42,.25);flex-shrink:0}
+.h-logo{display:flex;align-items:center;gap:12px}
+.h-logo-mark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--leaf),var(--mint));display:flex;align-items:center;justify-content:center;font-size:18px}
+.h-logo-name{font-family:'DM Serif Display',serif;font-size:22px;color:white}
+.h-logo-tag{font-size:11px;color:var(--mint);letter-spacing:.12em;text-transform:uppercase;font-weight:500}
+.h-user{display:flex;align-items:center;gap:10px}
+.h-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--leaf),var(--moss));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:white;border:2px solid rgba(149,213,178,.3)}
+.h-name{font-size:13px;font-weight:500;color:white}
+.h-role{font-size:11px;color:var(--mint)}
+
+main{flex:1;padding:40px;max-width:1100px;margin:0 auto;width:100%}
+
+.page-hdr{margin-bottom:32px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.page-title{font-family:'DM Serif Display',serif;font-size:36px;color:var(--forest);line-height:1.1}
+.page-title span{display:block;font-size:13px;font-family:'DM Sans',sans-serif;font-weight:400;color:var(--stone);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px}
+.balance-bar{display:flex;gap:12px;flex-wrap:wrap}
+.bal-pill{background:white;border:1.5px solid var(--mist);border-radius:12px;padding:10px 18px;text-align:center;min-width:96px;box-shadow:0 2px 8px rgba(26,58,42,.06)}
+.bal-num{font-family:'DM Serif Display',serif;font-size:28px;color:var(--moss);line-height:1}
+.bal-num.warn{color:var(--amber)}
+.bal-lbl{font-size:11px;color:var(--stone);text-transform:uppercase;letter-spacing:.08em;margin-top:3px;font-weight:500}
+
+.grid{display:grid;grid-template-columns:1fr 330px;gap:24px;align-items:start}
+
+.card{background:white;border-radius:20px;border:1.5px solid rgba(216,243,220,.8);box-shadow:0 4px 24px rgba(26,58,42,.07);overflow:hidden}
+.card-hdr{padding:20px 26px 16px;border-bottom:1.5px solid var(--mist);display:flex;align-items:center;gap:10px}
+.card-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.card-icon.g{background:var(--mist)}
+.card-icon.a{background:var(--amber-lt)}
+.card-ttl{font-size:15px;font-weight:600;color:var(--forest)}
+.card-body{padding:22px 26px}
+
+.policy{background:linear-gradient(135deg,var(--mist),rgba(216,243,220,.4));border:1.5px solid var(--mint);border-radius:12px;padding:13px 15px;font-size:12px;color:var(--moss);line-height:1.7;margin-bottom:16px}
+.policy strong{color:var(--forest)}
+
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.type-opt{border:1.5px solid #e5e5e0;border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;background:var(--cream)}
+.type-opt:hover{border-color:var(--mint);background:white}
+.type-opt.on{border-color:var(--leaf);background:white;box-shadow:0 0 0 3px rgba(82,183,136,.12)}
+.type-dot{width:18px;height:18px;border-radius:50%;border:2px solid #ccc;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}
+.type-opt.on .type-dot{border-color:var(--leaf);background:var(--leaf)}
+.type-opt.on .type-dot::after{content:'';width:6px;height:6px;border-radius:50%;background:white}
+.type-lbl{font-size:13px;font-weight:500;color:var(--ink)}
+.type-sub{font-size:11px;color:var(--stone)}
+
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+.frow.full{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:600;color:var(--moss);text-transform:uppercase;letter-spacing:.07em}
+.field label .req{color:var(--error);margin-left:2px}
+.field input,.field select,.field textarea{font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);background:var(--cream);border:1.5px solid #e5e5e0;border-radius:10px;padding:10px 14px;outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--leaf);background:white;box-shadow:0 0 0 3px rgba(82,183,136,.12)}
+.field textarea{resize:vertical;min-height:76px}
+.field select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%232d6a4f' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px;cursor:pointer}
+.f-hint{font-size:11px;color:var(--stone);margin-top:2px}
+.f-err{font-size:11px;color:var(--error);margin-top:2px;display:none}
+.has-err .f-err{display:block}
+.has-err input{border-color:var(--error)}
+
+.days-prev{background:var(--mist);border-radius:10px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;opacity:0;transition:opacity .3s}
+.days-prev.show{opacity:1}
+.dp-lbl{font-size:13px;color:var(--moss);font-weight:500}
+.dp-sub{font-size:11px;color:var(--stone);margin-top:2px}
+.dp-num{font-family:'DM Serif Display',serif;font-size:24px;color:var(--forest)}
+.dp-num.over{color:var(--error)}
+
+.divider{height:1px;background:var(--mist);margin:18px 0}
+.send-row{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--stone)}
+
+.btn-submit{width:100%;background:linear-gradient(135deg,var(--moss),var(--forest));color:white;border:none;border-radius:12px;padding:14px 24px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all .2s;margin-top:18px;box-shadow:0 4px 14px rgba(45,106,79,.3)}
+.btn-submit:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(45,106,79,.4)}
+
+.sidebar{display:flex;flex-direction:column;gap:16px}
+
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cal-month{font-family:'DM Serif Display',serif;font-size:17px;color:var(--forest)}
+.cal-btn{width:28px;height:28px;border-radius:7px;border:1.5px solid var(--mist);background:var(--cream);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--moss);font-size:14px;transition:all .15s}
+.cal-btn:hover{background:var(--mist)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:10px;font-weight:600;color:var(--stone);text-align:center;padding:4px 0;text-transform:uppercase;letter-spacing:.05em}
+.cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:12px;border-radius:6px;cursor:pointer;transition:all .15s;color:var(--ink)}
+.cal-day:hover:not(.empty):not(.other):not(.past){background:var(--mist);color:var(--moss)}
+.cal-day.other{color:#ccc;cursor:default}
+.cal-day.past{color:#d1d5db;cursor:default;pointer-events:none}
+.cal-day.today{font-weight:700;color:var(--moss)}
+.cal-day.fest{color:var(--amber);font-weight:600}
+.cal-day.in-range{background:var(--mist);border-radius:0;color:var(--moss)}
+.cal-day.r-start{background:var(--moss);color:white;font-weight:600;border-radius:6px 0 0 6px}
+.cal-day.r-end{background:var(--moss);color:white;font-weight:600;border-radius:0 6px 6px 0}
+.cal-day.r-start.r-end{border-radius:6px}
+.cal-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:14px;border-top:1px solid var(--mist)}
+.cal-leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--stone)}
+.cal-leg-dot{width:8px;height:8px;border-radius:2px}
+
+.req-list{display:flex;flex-direction:column;gap:10px}
+.req-item{border:1.5px solid var(--mist);border-radius:12px;padding:11px 13px;display:flex;align-items:center;gap:12px}
+.req-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.req-dot.aprobada{background:var(--success)}
+.req-dot.pendiente{background:var(--amber)}
+.req-dot.rechazada{background:var(--error)}
+.req-info{flex:1;min-width:0}
+.req-dates{font-size:13px;font-weight:500;color:var(--ink)}
+.req-meta{font-size:11px;color:var(--stone)}
+.req-badge{font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0}
+.req-badge.aprobada{background:var(--success-lt);color:var(--success)}
+.req-badge.pendiente{background:var(--amber-lt);color:var(--amber)}
+.req-badge.rechazada{background:var(--error-lt);color:var(--error)}
+
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--forest);color:white;padding:13px 22px;border-radius:13px;font-size:14px;font-weight:500;box-shadow:0 8px 30px rgba(26,58,42,.35);z-index:1000;transition:transform .4s cubic-bezier(.34,1.56,.64,1);white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+.success-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(245,240,232,.95);align-items:center;justify-content:center;backdrop-filter:blur(4px)}
+.success-overlay.show{display:flex}
+.success-card{background:white;border-radius:24px;padding:44px 52px;text-align:center;max-width:400px;box-shadow:0 20px 60px rgba(26,58,42,.18);border:1.5px solid var(--mist);animation:pop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:scale(1);opacity:1}}
+.success-icon{font-size:52px;margin-bottom:14px}
+.success-title{font-family:'DM Serif Display',serif;font-size:26px;color:var(--forest);margin-bottom:10px}
+.success-sub{font-size:14px;color:var(--stone);line-height:1.6;margin-bottom:20px}
+.success-detail{background:var(--mist);border-radius:12px;padding:13px 18px;text-align:left;margin-bottom:22px;font-size:13px;color:var(--moss);line-height:1.8}
+.btn-back{background:var(--moss);color:white;border:none;border-radius:12px;padding:11px 26px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-back:hover{background:var(--forest)}
+
+@media(max-width:860px){
+  main{padding:24px 20px}
+  .grid{grid-template-columns:1fr}
+  .frow{grid-template-columns:1fr}
+  header{padding:0 20px}
+  .page-hdr{flex-direction:column;align-items:flex-start}
+  .type-grid{grid-template-columns:1fr}
+  .l-left{display:none}
+  .l-right{width:100%;padding:40px 28px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ════════════════════════════════════════════════ -->
+<div id="loginPage">
+  <div class="l-left">
+    <div class="l-brand">
+      <div class="l-brand-icon">&#127807;</div>
+      <div>
+        <div class="l-brand-name">Frondoso</div>
+        <div class="l-brand-tag">Portal del Empleado</div>
+      </div>
+    </div>
+    <div class="l-headline">Tu espacio<br>de trabajo,<br><em>a tu medida.</em></div>
+    <div class="l-sub">Gestiona tus vacaciones, consulta tu equipo y accede a todos los recursos de Frondoso desde un solo lugar.</div>
+    <div class="l-feats">
+      <div class="l-feat"><div class="l-feat-dot">&#127958;</div><span>Solicita y gestiona tus vacaciones en segundos</span></div>
+      <div class="l-feat"><div class="l-feat-dot">&#128197;</div><span>Consulta el calendario del equipo en tiempo real</span></div>
+      <div class="l-feat"><div class="l-feat-dot">&#127807;</div><span>Integrado con Microsoft 365 y Teams</span></div>
+    </div>
+  </div>
+  <div class="l-right">
+    <div class="l-title">Bienvenido/a</div>
+    <div class="l-subtitle">Accede con tu usuario corporativo</div>
+    <div class="l-err" id="lErr"><span>&#9888;&#65039;</span><span id="lErrTxt"></span></div>
+    <div class="l-field">
+      <label>Usuario</label>
+      <input type="text" id="lUser" placeholder="tu usuario" autocomplete="username">
+    </div>
+    <div class="l-field">
+      <label>Contrasena</label>
+      <input type="password" id="lPass" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" autocomplete="current-password">
+    </div>
+    <label class="l-remember">
+      <input type="checkbox" checked>
+      <span>Mantener sesion iniciada</span>
+    </label>
+    <button class="btn-login" id="btnLogin" onclick="doLogin()">
+      <div class="spinner" id="lSpinner"></div>
+      <span class="btn-txt">Entrar al portal</span>
+    </button>
+    <div class="l-hint">Problemas de acceso: contacta con <strong>David Ruiz (IT)</strong></div>
+  </div>
+</div>
+
+<!-- ══ APP ═══════════════════════════════════════════════════ -->
+<div id="app">
+  <header>
+    <div class="h-logo">
+      <div class="h-logo-mark">&#127807;</div>
+      <div>
+        <div class="h-logo-name">Frondoso</div>
+        <div class="h-logo-tag">Portal del Empleado</div>
+      </div>
+    </div>
+    <div class="h-user">
+      <div style="text-align:right">
+        <div class="h-name" id="hName">-</div>
+        <div class="h-role" id="hRole">-</div>
+      </div>
+      <div class="h-avatar" id="hAvatar">-</div>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-hdr">
+      <div class="page-title"><span>Recursos Humanos</span>Solicitud de Vacaciones</div>
+      <div class="balance-bar">
+        <div class="bal-pill"><div class="bal-num">23</div><div class="bal-lbl">Totales</div></div>
+        <div class="bal-pill"><div class="bal-num" id="bUsados">9</div><div class="bal-lbl">Usados</div></div>
+        <div class="bal-pill"><div class="bal-num" id="bDisp">14</div><div class="bal-lbl">Disponibles</div></div>
+        <div class="bal-pill"><div class="bal-num warn" id="bSolic">0</div><div class="bal-lbl">Esta solicitud</div></div>
+      </div>
+    </div>
+
+    <div class="grid">
+      <!-- FORM -->
+      <div class="card">
+        <div class="card-hdr"><div class="card-icon g">&#128203;</div><div class="card-ttl">Nueva solicitud</div></div>
+        <div class="card-body">
+          <div class="policy"><strong>&#128204; Recuerda:</strong> Las solicitudes deben enviarse con <strong>minimo 15 dias de antelacion</strong>. Tu responsable recibirá la peticion por <strong>Microsoft Teams</strong> y tendra 48h para responder.</div>
+
+          <div class="field" style="margin-bottom:16px">
+            <label>Tipo de ausencia <span class="req">*</span></label>
+            <div class="type-grid">
+              <div class="type-opt on" id="t0" onclick="setType(0)"><div class="type-dot"></div><div><div class="type-lbl">&#127958;&#65039; Vacaciones</div><div class="type-sub">Dias de descanso anuales</div></div></div>
+              <div class="type-opt"    id="t1" onclick="setType(1)"><div class="type-dot"></div><div><div class="type-lbl">&#128197; Asuntos propios</div><div class="type-sub">Gestiones personales</div></div></div>
+              <div class="type-opt"    id="t2" onclick="setType(2)"><div class="type-dot"></div><div><div class="type-lbl">&#129298; Baja medica</div><div class="type-sub">Requiere justificante</div></div></div>
+              <div class="type-opt"    id="t3" onclick="setType(3)"><div class="type-dot"></div><div><div class="type-lbl">&#128206; Otro motivo</div><div class="type-sub">Especificar en comentarios</div></div></div>
+            </div>
+          </div>
+
+          <div class="frow">
+            <div class="field" id="fDesde">
+              <label>Fecha de inicio <span class="req">*</span></label>
+              <input type="date" id="fechaDesde" onchange="calcDays()">
+              <span class="f-err">Selecciona una fecha valida</span>
+            </div>
+            <div class="field" id="fHasta">
+              <label>Fecha de fin <span class="req">*</span></label>
+              <input type="date" id="fechaHasta" onchange="calcDays()">
+              <span class="f-err">La fecha de fin debe ser posterior al inicio</span>
+            </div>
+          </div>
+
+          <div class="days-prev" id="daysPrev">
+            <div><div class="dp-lbl">Dias laborables solicitados</div><div class="dp-sub">Excluye fines de semana y festivos</div></div>
+            <div class="dp-num" id="dpNum">-</div>
+          </div>
+
+          <div class="frow full">
+            <div class="field">
+              <label>Comentario</label>
+              <textarea id="comentario" placeholder="Informacion adicional para tu manager..."></textarea>
+            </div>
+          </div>
+
+          <div class="frow full">
+            <div class="field">
+              <label>Quien te cubre</label>
+              <select id="sustituto">
+                <option value="">Sin sustituto designado</option>
+                <option>Joan Ferrer (Director Ops)</option>
+                <option>Marta Ibanez</option>
+                <option>Sofia Romero</option>
+                <option>Alex Torrent</option>
+                <option>Otro (especificar en comentario)</option>
+              </select>
+              <span class="f-hint">Recomendado para ausencias de mas de 3 dias</span>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+          <div class="send-row"><span>&#128232;</span><span>La solicitud se enviara a <strong style="color:var(--moss)" id="managerName">tu responsable</strong> via Microsoft Teams.</span></div>
+          <button class="btn-submit" onclick="submitForm()">&#127807;  Enviar solicitud</button>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="sidebar">
+        <div class="card">
+          <div class="card-hdr"><div class="card-icon g">&#128198;</div><div class="card-ttl">Calendario</div></div>
+          <div style="padding:18px 20px 14px">
+            <div class="cal-nav">
+              <button class="cal-btn" onclick="prevMonth()">&#8249;</button>
+              <div class="cal-month" id="calMonth">-</div>
+              <button class="cal-btn" onclick="nextMonth()">&#8250;</button>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+            <div class="cal-legend">
+              <div class="cal-leg"><div class="cal-leg-dot" style="background:var(--moss)"></div>Seleccionado</div>
+              <div class="cal-leg"><div class="cal-leg-dot" style="background:var(--mist);border:1px solid var(--mint)"></div>Rango</div>
+              <div class="cal-leg"><div class="cal-leg-dot" style="background:var(--amber-lt);border:1px solid var(--amber)"></div>Festivo</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr"><div class="card-icon a">&#128193;</div><div class="card-ttl">Mis solicitudes 2025</div></div>
+          <div class="card-body" style="padding-top:14px"><div class="req-list" id="reqList"></div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- SUCCESS -->
+<div class="success-overlay" id="successOverlay">
+  <div class="success-card">
+    <div class="success-icon">&#127807;</div>
+    <div class="success-title">Solicitud enviada</div>
+    <div class="success-sub">Tu responsable recibira la peticion por Teams y te respondera en maximo 48 horas.</div>
+    <div class="success-detail" id="successDetail"></div>
+    <button class="btn-back" onclick="resetForm()">Volver al formulario</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── USERS ────────────────────────────────────────────────────
+var USERS = {
+  magda:  {pass:'frondoso2025', name:'Magda Vilanova',  role:'Disenadora · Diseno y Botanica',  initials:'MV', manager:'Sofia Romero'},
+  victor: {pass:'frondoso2025', name:'Victor Pla',      role:'Tecnico Instalacion · Operaciones',initials:'VP', manager:'Joan Ferrer'},
+  carlos: {pass:'frondoso2025', name:'Carlos Mendoza',  role:'Project Manager · Operaciones',   initials:'CM', manager:'Joan Ferrer'},
+  joan:   {pass:'frondoso2025', name:'Joan Ferrer',     role:'Director de Operaciones',          initials:'JF', manager:'Elena Vega'},
+  laia:   {pass:'frondoso2025', name:'Laia Camps',      role:'Responsable RRHH',                 initials:'LC', manager:'Elena Vega'}
+};
+
+// ── INIT ─────────────────────────────────────────────────────
+var calYear = new Date().getFullYear();
+var calMon  = new Date().getMonth();
+var selTipo = 0;
+var diasDisp = 14;
+var TIPOLABELS = ['Vacaciones','Asuntos propios','Baja medica','Otro motivo'];
+var FESTIVOS = ['2025-01-01','2025-01-06','2025-04-18','2025-04-21','2025-05-01','2025-06-09','2025-06-24','2025-08-15','2025-09-11','2025-09-24','2025-10-12','2025-11-01','2025-12-08','2025-12-25','2025-12-26'];
+var MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+var PREV_REQS = [
+  {desde:'2025-03-17',hasta:'2025-03-21',dias:5,tipo:'Vacaciones',estado:'aprobada'},
+  {desde:'2025-05-29',hasta:'2025-06-02',dias:4,tipo:'Vacaciones',estado:'aprobada'},
+  {desde:'2025-07-21',hasta:'2025-07-25',dias:5,tipo:'Vacaciones',estado:'pendiente'}
+];
+
+window.onload = function() {
+  var today = new Date().toISOString().split('T')[0];
+  document.getElementById('fechaDesde').min = today;
+  document.getElementById('fechaHasta').min = today;
+  document.getElementById('lUser').focus();
+  document.getElementById('lPass').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+  document.getElementById('lUser').addEventListener('keydown', function(e){ if(e.key==='Enter') doLogin(); });
+  renderCalendar();
+  renderReqs();
+};
+
+// ── LOGIN ─────────────────────────────────────────────────────
+function doLogin() {
+  var user = document.getElementById('lUser').value.trim().toLowerCase();
+  var pass = document.getElementById('lPass').value;
+  var errEl = document.getElementById('lErr');
+  var errTxt = document.getElementById('lErrTxt');
+  var btn = document.getElementById('btnLogin');
+
+  errEl.classList.remove('show');
+
+  if (!user) { errTxt.textContent='Introduce tu usuario'; errEl.classList.add('show'); return; }
+  if (!pass)  { errTxt.textContent='Introduce tu contrasena'; errEl.classList.add('show'); return; }
+
+  btn.disabled = true;
+  document.getElementById('lSpinner').style.display = 'block';
+  document.querySelector('#btnLogin .btn-txt').style.opacity = '0';
+
+  setTimeout(function() {
+    var u = USERS[user];
+    if (!u || u.pass !== pass) {
+      errTxt.textContent = 'Usuario o contrasena incorrectos';
+      errEl.classList.add('show');
+      document.getElementById('lPass').value = '';
+      btn.disabled = false;
+      document.getElementById('lSpinner').style.display = 'none';
+      document.querySelector('#btnLogin .btn-txt').style.opacity = '1';
+      return;
+    }
+    // Success
+    document.getElementById('hName').textContent = u.name;
+    document.getElementById('hRole').textContent = u.role;
+    document.getElementById('hAvatar').textContent = u.initials;
+    document.getElementById('managerName').textContent = u.manager;
+
+    var lp = document.getElementById('loginPage');
+    lp.classList.add('out');
+    document.getElementById('app').classList.add('show');
+    setTimeout(function(){ lp.style.display='none'; }, 500);
+  }, 1200);
+}
+
+// ── TYPE ──────────────────────────────────────────────────────
+function setType(n) {
+  selTipo = n;
+  for (var i=0;i<4;i++) {
+    var el = document.getElementById('t'+i);
+    if (el) el.className = 'type-opt' + (i===n?' on':'');
+  }
+}
+
+// ── DAYS ──────────────────────────────────────────────────────
+function isFest(d) { return FESTIVOS.indexOf(d.toISOString().split('T')[0]) !== -1; }
+function workDays(a,b) {
+  var n=0, c=new Date(a);
+  while(c<=b){ var dw=c.getDay(); if(dw!==0&&dw!==6&&!isFest(c)) n++; c.setDate(c.getDate()+1); }
+  return n;
+}
+
+function calcDays() {
+  var ds = document.getElementById('fechaDesde').value;
+  var hs = document.getElementById('fechaHasta').value;
+  var prev = document.getElementById('daysPrev');
+  var dpn  = document.getElementById('dpNum');
+  var bSolic = document.getElementById('bSolic');
+  document.getElementById('fHasta').classList.remove('has-err');
+  if (!ds||!hs){ prev.classList.remove('show'); bSolic.textContent='0'; return; }
+  var d=new Date(ds+'T12:00:00'), h=new Date(hs+'T12:00:00');
+  if(h<d){ document.getElementById('fHasta').classList.add('has-err'); prev.classList.remove('show'); return; }
+  var n = workDays(d,h);
+  dpn.textContent = n+(n===1?' dia':' dias');
+  dpn.className = 'dp-num'+(n>diasDisp?' over':'');
+  bSolic.textContent = n;
+  prev.classList.add('show');
+  var saved = [calYear, calMon];
+  calYear = d.getFullYear(); calMon = d.getMonth();
+  renderCalendar();
+}
+
+// ── CALENDAR ─────────────────────────────────────────────────
+function prevMonth(){ calMon--; if(calMon<0){calMon=11;calYear--;} renderCalendar(); }
+function nextMonth(){ calMon++; if(calMon>11){calMon=0;calYear++;} renderCalendar(); }
+
+function renderCalendar() {
+  var mEl = document.getElementById('calMonth');
+  var grid = document.getElementById('calGrid');
+  if(!mEl||!grid) return;
+  mEl.textContent = MONTHS[calMon]+' '+calYear;
+  grid.innerHTML = '';
+  ['Lu','Ma','Mi','Ju','Vi','Sa','Do'].forEach(function(d){
+    var el=document.createElement('div'); el.className='cal-dow'; el.textContent=d; grid.appendChild(el);
+  });
+  var ds = document.getElementById('fechaDesde') ? document.getElementById('fechaDesde').value : '';
+  var hs = document.getElementById('fechaHasta') ? document.getElementById('fechaHasta').value : '';
+  var rs = ds ? new Date(ds+'T12:00:00') : null;
+  var re = hs ? new Date(hs+'T12:00:00') : null;
+  var today = new Date(); today.setHours(12,0,0,0);
+  var first = new Date(calYear,calMon,1);
+  var last  = new Date(calYear,calMon+1,0);
+  var off = first.getDay(); off = off===0?6:off-1;
+  for(var i=0;i<off;i++){ var b=document.createElement('div'); b.className='cal-day empty'; grid.appendChild(b); }
+  for(var day=1;day<=last.getDate();day++){
+    var date=new Date(calYear,calMon,day,12);
+    var el=document.createElement('div');
+    el.textContent=day;
+    var cls='cal-day';
+    if(date<today&&date.toDateString()!==today.toDateString()) cls+=' past';
+    if(date.toDateString()===today.toDateString()) cls+=' today';
+    if(date.getDay()===0||date.getDay()===6) cls+=' weekend';
+    if(isFest(date)) cls+=' fest';
+    if(rs&&re){
+      if(date.toDateString()===rs.toDateString()) cls+=' r-start';
+      if(date.toDateString()===re.toDateString()) cls+=' r-end';
+      if(date>rs&&date<re) cls+=' in-range';
+    } else if(rs&&date.toDateString()===rs.toDateString()) cls+=' r-start r-end';
+    el.className=cls;
+    (function(d,s){
+      if(cls.indexOf('past')===-1){
+        el.addEventListener('click',function(){
+          var fd=document.getElementById('fechaDesde');
+          var fh=document.getElementById('fechaHasta');
+          var str=s+'-'+String(calMon+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+          if(!fd.value||(fd.value&&fh.value)){fd.value=str;fh.value='';}
+          else if(new Date(str+'T12:00:00')<new Date(fd.value+'T12:00:00')){fd.value=str;}
+          else{fh.value=str;}
+          calcDays();
+        });
+      }
+    })(day, calYear);
+    grid.appendChild(el);
+  }
+}
+
+// ── REQUESTS ─────────────────────────────────────────────────
+function renderReqs(extra) {
+  var list = document.getElementById('reqList');
+  if(!list) return;
+  var all = extra ? PREV_REQS.concat([extra]) : PREV_REQS;
+  list.innerHTML = all.map(function(r){
+    var d=new Date(r.desde+'T12:00:00'), h=new Date(r.hasta+'T12:00:00');
+    var fmt=function(dt){return dt.toLocaleDateString('es-ES',{day:'numeric',month:'short'});};
+    return '<div class="req-item"><div class="req-dot '+r.estado+'"></div><div class="req-info"><div class="req-dates">'+fmt(d)+' - '+fmt(h)+'</div><div class="req-meta">'+r.dias+' dias - '+r.tipo+'</div></div><span class="req-badge '+r.estado+'">'+r.estado+'</span></div>';
+  }).join('');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────
+var toastTimer;
+function showToast(msg) {
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(function(){t.classList.remove('show');},3000);
+}
+
+// ── SUBMIT ────────────────────────────────────────────────────
+function submitForm() {
+  var ds=document.getElementById('fechaDesde').value;
+  var hs=document.getElementById('fechaHasta').value;
+  var ok=true;
+  document.getElementById('fDesde').classList.remove('has-err');
+  document.getElementById('fHasta').classList.remove('has-err');
+  if(!ds){document.getElementById('fDesde').classList.add('has-err');ok=false;}
+  if(!hs){document.getElementById('fHasta').classList.add('has-err');ok=false;}
+  if(ds&&hs&&new Date(hs)<new Date(ds)){document.getElementById('fHasta').classList.add('has-err');ok=false;}
+  if(!ok){showToast('Revisa los campos marcados');return;}
+  var d=new Date(ds+'T12:00:00'),h=new Date(hs+'T12:00:00');
+  var dias=workDays(d,h);
+  var fmt=function(dt){return dt.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});};
+  var ref='FRO-'+String(Math.floor(Math.random()*9000)+1000);
+  document.getElementById('successDetail').innerHTML='<strong>Ref:</strong> '+ref+'<br><strong>Tipo:</strong> '+TIPOLABELS[selTipo]+'<br><strong>Inicio:</strong> '+fmt(d)+'<br><strong>Fin:</strong> '+fmt(h)+'<br><strong>Dias laborables:</strong> '+dias;
+  var nr={desde:ds,hasta:hs,dias:dias,tipo:TIPOLABELS[selTipo],estado:'pendiente'};
+  PREV_REQS.push(nr);
+  renderReqs();
+  var cu=parseInt(document.getElementById('bUsados').textContent);
+  var cd=parseInt(document.getElementById('bDisp').textContent);
+  document.getElementById('bUsados').textContent=cu+dias;
+  document.getElementById('bDisp').textContent=Math.max(0,cd-dias);
+  diasDisp=Math.max(0,cd-dias);
+  document.getElementById('successOverlay').classList.add('show');
+}
+
+// ── RESET ─────────────────────────────────────────────────────
+function resetForm() {
+  document.getElementById('successOverlay').classList.remove('show');
+  document.getElementById('fechaDesde').value='';
+  document.getElementById('fechaHasta').value='';
+  document.getElementById('comentario').value='';
+  document.getElementById('sustituto').selectedIndex=0;
+  document.getElementById('daysPrev').classList.remove('show');
+  document.getElementById('bSolic').textContent='0';
+  setType(0);
+  renderCalendar();
+}
+</script>
+</body>
+</html>
