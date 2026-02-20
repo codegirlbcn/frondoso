@@ -6,6 +6,7 @@
 <title>Frondoso · Portal del Empleado</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
 <style>
+
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
@@ -758,10 +759,13 @@
     .login-right { width: 100%; padding: 40px 28px; }
   }
 
+
+/* Hide appWrapper on load */
+#appWrapper { display: none; }
+#loginPage { display: flex; }
 </style>
 </head>
 <body>
-
 <!-- ══════════════════════════════════════════════════════════
      LOGIN PAGE
 ═══════════════════════════════════════════════════════════ -->
@@ -839,7 +843,7 @@
 
     <div class="login-hint">
       <p>¿Primera vez? Usa tus credenciales de Microsoft 365.<br>Si tienes problemas de acceso, contacta con</p>
-      <p><strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="a5ccd1e5c3d7cacbc1cad6ca8bc0d0">[email&#160;protected]</a></strong></p>
+      <p><strong>it@frondoso.eu</strong></p>
       <div class="demo-creds">
         <div class="demo-chip" onclick="fillCreds('magda@frondoso.eu','frondoso2025')">👤 Magda</div>
         <div class="demo-chip" onclick="fillCreds('victor.pla@frondoso.eu','frondoso2025')">👤 Víctor</div>
@@ -854,7 +858,7 @@
 <!-- ══════════════════════════════════════════════════════════
      APP WRAPPER (hidden until login)
 ═══════════════════════════════════════════════════════════ -->
-<div id="appWrapper" style="display:none">
+<div id="appWrapper">
 
 <!-- Decorative leaves -->
 <svg class="leaf-bg tl" viewBox="0 0 200 300" fill="var(--forest)">
@@ -1092,8 +1096,9 @@
   <span class="toast-icon" id="toastIcon">✅</span>
   <span id="toastMsg"></span>
 </div>
+</div><!-- /appWrapper -->
+<script>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ── DATA ─────────────────────────────────────────────────────────
 const FESTIVOS_2025 = [
   '2025-01-01','2025-01-06','2025-04-18','2025-04-21',
@@ -1443,4 +1448,15 @@ function doLogin() {
     // Transition
     const loginPage = document.getElementById('loginPage');
     loginPage.classList.add('hidden');
-    document.getElementById('appWrapp
+    document.getElementById('appWrapper').style.display = 'flex';
+    document.getElementById('appWrapper').style.display = 'flex';
+
+    setTimeout(() => { loginPage.style.display = 'none'; }, 600);
+    btn.classList.remove('loading'); btn.disabled = false;
+  }, 1400);
+}
+
+
+</script>
+</body>
+</html>
