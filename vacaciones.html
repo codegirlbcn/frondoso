@@ -197,6 +197,21 @@ main{flex:1;padding:40px;max-width:1100px;margin:0 auto;width:100%}
   .l-left{display:none}
   .l-right{width:100%;padding:40px 28px}
 }
+
+.h-user{position:relative}
+.h-avatar{cursor:pointer;transition:box-shadow .2s}
+.h-avatar:hover{box-shadow:0 0 0 3px rgba(149,213,178,.5)}
+.profile-menu{position:absolute;top:calc(100% + 10px);right:0;background:white;border-radius:14px;box-shadow:0 8px 30px rgba(26,58,42,.18);border:1.5px solid var(--mist);min-width:200px;overflow:hidden;display:none;z-index:100}
+.profile-menu.open{display:block;animation:menuIn .2s ease}
+@keyframes menuIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.pm-header{padding:14px 16px;background:var(--green-pale);border-bottom:1px solid var(--mist)}
+.pm-name{font-size:14px;font-weight:600;color:var(--forest)}
+.pm-role{font-size:11px;color:var(--stone);margin-top:2px}
+.pm-item{display:flex;align-items:center;gap:10px;padding:11px 16px;font-size:13px;color:var(--ink);cursor:pointer;transition:background .15s}
+.pm-item:hover{background:var(--green-pale)}
+.pm-item.logout{color:var(--error)}
+.pm-item.logout:hover{background:var(--error-lt)}
+.pm-divider{height:1px;background:var(--mist)}
 </style>
 </head>
 <body>
@@ -258,7 +273,17 @@ main{flex:1;padding:40px;max-width:1100px;margin:0 auto;width:100%}
         <div class="h-name" id="hName">-</div>
         <div class="h-role" id="hRole">-</div>
       </div>
-      <div class="h-avatar" id="hAvatar">-</div>
+      <div class="h-avatar" id="hAvatar" onclick="toggleMenu()">-</div>
+      <div class="profile-menu" id="profileMenu">
+        <div class="pm-header">
+          <div class="pm-name" id="pmName">-</div>
+          <div class="pm-role" id="pmRole">-</div>
+        </div>
+        <div class="pm-item">&#128197; Mis solicitudes</div>
+        <div class="pm-item">&#9881;&#65039; Configuracion</div>
+        <div class="pm-divider"></div>
+        <div class="pm-item logout" onclick="doLogout()">&#8594; Cerrar sesion</div>
+      </div>
     </div>
   </header>
 
@@ -381,7 +406,7 @@ main{flex:1;padding:40px;max-width:1100px;margin:0 auto;width:100%}
 <script>
 // ── USERS ────────────────────────────────────────────────────
 var USERS = {
-  magda:  {pass:'frondoso2025', name:'Magda Vilanova',  role:'Disenadora · Diseno y Botanica',  initials:'MV', manager:'Sofia Romero'},
+  magda:  {pass:'frondoso2025', name:'Magda Teruel',    role:'Disenadora · Diseno y Botanica',  initials:'MT', manager:'Sofia Romero'},
   victor: {pass:'frondoso2025', name:'Victor Pla',      role:'Tecnico Instalacion · Operaciones',initials:'VP', manager:'Joan Ferrer'},
   carlos: {pass:'frondoso2025', name:'Carlos Mendoza',  role:'Project Manager · Operaciones',   initials:'CM', manager:'Joan Ferrer'},
   joan:   {pass:'frondoso2025', name:'Joan Ferrer',     role:'Director de Operaciones',          initials:'JF', manager:'Elena Vega'},
@@ -445,6 +470,8 @@ function doLogin() {
     document.getElementById('hName').textContent = u.name;
     document.getElementById('hRole').textContent = u.role;
     document.getElementById('hAvatar').textContent = u.initials;
+    document.getElementById('pmName').textContent = u.name;
+    document.getElementById('pmRole').textContent = u.role;
     document.getElementById('managerName').textContent = u.manager;
 
     var lp = document.getElementById('loginPage');
@@ -605,6 +632,30 @@ function resetForm() {
   setType(0);
   renderCalendar();
 }
+
+function toggleMenu() {
+  var m = document.getElementById('profileMenu');
+  m.classList.toggle('open');
+}
+document.addEventListener('click', function(e) {
+  var menu = document.getElementById('profileMenu');
+  var avatar = document.getElementById('hAvatar');
+  if (menu && avatar && !avatar.contains(e.target) && !menu.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+function doLogout() {
+  document.getElementById('app').classList.remove('show');
+  document.getElementById('app').style.display = 'none';
+  var lp = document.getElementById('loginPage');
+  lp.classList.remove('out');
+  lp.style.display = 'flex';
+  document.getElementById('lUser').value = '';
+  document.getElementById('lPass').value = '';
+  document.getElementById('lErr').classList.remove('show');
+  document.getElementById('profileMenu').classList.remove('open');
+}
+
 </script>
 </body>
 </html>
